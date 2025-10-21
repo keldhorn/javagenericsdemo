@@ -6,7 +6,7 @@ public class NaturalNumber {
     public NaturalNumber(int number) {
         naturalNumber = number;
     }
-    public void printNumber(){
+    public void printNumber() {
         System.out.println("Natural number: " + naturalNumber);
     }
 }
