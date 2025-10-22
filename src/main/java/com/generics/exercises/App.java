@@ -33,6 +33,19 @@ public class App {
     }
 
     private void addToAln() {
+        class Helper{
+            static <T extends NaturalNumber> void fooHelperAln(ArrayList<T> l) {
+                // l.add(new NaturalNumber(10)); // compile-time error
+                try{
+                    System.out.println("Adding null to ArrayList<? extends NaturalNumber> in Helper on line: 41");
+                    l.add((T) new NaturalNumber(10)); // OK at compile-time unchecked cast warning no exception at runtime
+                } catch (UnsupportedOperationException e) {
+                    System.out.println("null cannot be added to ArrayList<? extends NaturalNumber> in Helper on line: 41");
+                }
+                
+            }
+        }
+        Helper.fooHelperAln(aln);
         fooHelperAln(aln);
     }
 
@@ -84,7 +97,7 @@ public class App {
     private <T> void fooHelperAln(ArrayList<T> l) {
         l.set(l.size() - 1, l.get(0)); // no exception at runtime
         // l.set(0, new NaturalNumber(7)); compile-time error without cast
-        l.set(0, (T) new NaturalNumber(7)); // No exception at runtime, unchecked cast warning
+        l.set(0, (T) new NaturalNumber(7)); // No exception at runtime, unchecked cast warning        
     }
 
     // wildcard capture helper method
@@ -136,6 +149,8 @@ public class App {
         aln.add(null); // OK at compile-time and runtime
         System.out.println(
                 "null added to ArrayList<? extends NaturalNumber> aln successfully size of aln: " + aln.size());
+
+        System.out.println("\n The first element in aln is: ");                
         aln.get(0).printNumber();
 
         try {
@@ -160,14 +175,47 @@ public class App {
 
     public static void main(String args[]) {
         
-        System.out.println("Generics Exercise - Wildcards with extends");
+        System.out.println("Generics Exercise - Wildcards with extends\n");
         App app = new App();
+        
         app.addToLn();
+
+        System.out.println("\n");
+
         app.addToAln();
+        
+        System.out.println("\n");
+
         List<? extends NaturalNumber> ln = app.getLn();
-        ln.get(0).printNumber();
+        
+        int index = 1;
+        
+        System.out.println("\n");
+
+        for (NaturalNumber nn : ln) {
+            System.out.println("Element at index " + index++ + ": ");
+            if(nn!=null)
+                nn.printNumber();
+            else
+                System.out.println("null element in ln");
+        }
+
+        System.out.println("\n");
+
         ArrayList<? extends NaturalNumber> aln = app.getAln();
-        aln.get(1).printNumber();
+
+        index = 1;
+
+        for (NaturalNumber nn : aln) {
+            System.out.println("Element at index " + index++ + ": ");
+            if(nn!=null)
+                nn.printNumber();
+            else
+                System.out.println("null element in aln");
+        }
+        
+        System.out.println("\n");
+        
         aln.get(0).printNumber();
         //app.addToLnSuper(ln); // Compile-time error
         app.addToLnSuper((List<? extends EvenNumber>)ln); // unchecked cast warning
@@ -175,6 +223,47 @@ public class App {
         app.addToAen((ArrayList<? extends EvenNumber>)aln); // unchecked cast warning
         System.out.println(app.getLnSuper().size());
         System.out.println(app.getAen().size());
+
+        ArrayList<? super EvenNumber> aen = new ArrayList<>();
+
+        //aen.add("Test string"); // compile-time error 
+
+        aen.add(new EvenNumber(8)); // OK
+        Object obj = new String("A test string");
+        
+        try{
+            aen.add((EvenNumber)obj); // OK at compile-time, runtime exception
+        } 
+        catch (ClassCastException e){
+            System.out.println("Class Cast Exception caught while adding to aen: " + e);
+        }
+
+        //aen.add(new NaturalNumber(10)); // compile-time error 
+
+        class Helper{
+            static <T> void addToAen(ArrayList<? super T> aen, T obj) {
+                try{
+                    System.out.println("Adding to aen in Helper on line: 199 " + obj);
+                    aen.add((T) obj); // OK at compile-time, no exception
+                } 
+                catch (ClassCastException e) {
+                    System.out.println("obj could not be added to aen in Helper");
+                    System.out.println("Class Cast Exception caught while adding to aen in Helper: " + e);
+                }
+            }
+        }
+
+        Helper.addToAen(aen, new EvenNumber(12)); // OK
+        //Helper.addToAen(aen, new NaturalNumber(13)); // compile-time error
+
+        obj = new NaturalNumber(5);
+
+        try{
+            aen.add((EvenNumber)obj); // OK at compile-time, runtime exception
+        } 
+        catch (ClassCastException e){
+            System.out.println("Class Cast Exception caught while adding to aen: " + e);
+        }
 
         System.out.println("End of Generics Exercise - Wildcards with extends");
 
